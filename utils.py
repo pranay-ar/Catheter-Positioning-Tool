@@ -14,7 +14,7 @@ import tensorflow.keras.losses
 import tensorflow.keras.metrics
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-
+import cv2
 
 
 def load_images(num_img): #import all the images
@@ -31,7 +31,10 @@ def load_images(num_img): #import all the images
     set_test_mask = [imread('./train/'+str(i)+'_mask.tif') for i in original[:num_test]]
     return set_train, set_mask, set_test, set_test_mask
 
-def preprocessing(imgs, rows, cols, normalized=False, mask=False): #preprocessing to add one channels and to normalize
+def preprocessing(imgs, rows, cols, normalized=False, mask=False): 
+    """
+    preprocessing to add one channels and to normalize
+    """
 
     img_1 = np.asarray([resize(i, (rows, cols, 1), preserve_range=True) for i in imgs])
    
@@ -43,7 +46,10 @@ def preprocessing(imgs, rows, cols, normalized=False, mask=False): #preprocessin
     return img_1
 
 
-def dice_coef(y_true, y_pred, smooth=1): #to evaluate the model
+def dice_coef(y_true, y_pred, smooth=1): 
+    """
+    to evaluate the model
+    """
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
@@ -62,13 +68,19 @@ def dice_coef1(y_true, y_pred):
     smooth = 1
     return (2. * intersection + smooth) / (np.sum(y_true_f) + np.sum(y_pred_f) + smooth)
 
-def dice_coef_multilabel(y_true, y_pred): #to make the average with the dice coef of the 2 classes (sofmax)
+def dice_coef_multilabel(y_true, y_pred): 
+    """
+    to make the average with the dice coef of the 2 classes (sofmax)
+    """
     dice=0
     for index in range(2):
         dice += dice_coef(y_true[:,:,:,index], y_pred[:,:,:,index])
     return dice/2 # taking average
 
-def mask2channels(imgs): #to give 2 channels for the mask and use the softmax
+def mask2channels(imgs):
+    """
+    to give 2 channels for the mask and use the softmax
+    """
     img_1 = np.ndarray((np.asarray(imgs).shape[0],np.asarray(imgs).shape[1], np.asarray(imgs).shape[2], 2), dtype=np.float)
 
     img_1[:,:,:,1]= [1-i[:,:,0] for i in imgs]
@@ -76,6 +88,7 @@ def mask2channels(imgs): #to give 2 channels for the mask and use the softmax
     return img_1
 
 def get_unet(img_rows, img_cols):
+
     inputs = Input((img_rows, img_cols, 1))
     conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
     conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv1)
@@ -108,7 +121,6 @@ def get_unet(img_rows, img_cols):
     conv7 = Conv2D(128, (3, 3), activation='relu', padding='same')(up7)
     conv7 = Conv2D(128, (3, 3), activation='relu', padding='same')(conv7)
     
-
     up8 = concatenate([Conv2DTranspose(64, (2, 2), strides=(2, 2), padding='same')(conv7), conv2], axis=3)
     conv8 = Conv2D(64, (3, 3), activation='relu', padding='same')(up8)
     conv8 = Conv2D(64, (3, 3), activation='relu', padding='same')(conv8)
@@ -116,11 +128,22 @@ def get_unet(img_rows, img_cols):
     up9 = concatenate([Conv2DTranspose(32, (2, 2), strides=(2, 2), padding='same')(conv8), conv1], axis=3)
     conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(up9)
     conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv9)
-
+    
     conv10 = Conv2D(2, (1, 1), activation='softmax')(conv9)
-
+    
     model = Model(inputs=[inputs], outputs=[conv10])
-
     model.compile(optimizer= Adam(lr=1e-3), loss= [tensorflow.keras.losses.binary_crossentropy], metrics=[dice_coef_multilabel])
-
+    
     return model
+
+
+def auto_canny(image, sigma=0.33):
+    
+    # compute the median of the single channel pixel intensities
+    v = np.median(image)
+
+    # apply automatic Canny edge detection using the computed median
+    lower = int(max(0, (1.0 - sigma) * v))
+    upper = int(min(255, (1.0 + sigma) * v))
+    edged = cv2.Canny(image, lower, upper)
+    return edged
