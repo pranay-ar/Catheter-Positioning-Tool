@@ -1,6 +1,6 @@
 # Catheter Positioning tool
 
-The following project leverages the applications of Semantic Segmentation in accurately identifying the nerve strucure in Ultrasound Images and thereby providing a region of interest for the safe administration of the catheter.
+The following project leverages the applications of Semantic Segmentation in accurately identifying the nerve structure in Ultrasound Images and thereby providing a region of interest for the safe administration of the catheter.
 
 ## Project Execution
 
