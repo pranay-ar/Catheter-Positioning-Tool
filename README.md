@@ -17,15 +17,15 @@ The following project leverages the applications of Semantic Segmentation in acc
 
 - Task at hand: 
 
-![Result] (result.png)
+![Result](result.png)
 
 - Training Loss:
 
-![Loss-Graph] (training-loss.png)
+![Loss-Graph](training-loss.png)
 
 - F1 Score:
 
-![F1-Score] (dice-coefficient.png)
+![F1-Score](dice-coefficient.png)
 
 ## References
 
