@@ -15,15 +15,15 @@ The following project leverages the applications of Semantic Segmentation in acc
 
 ## Performance Analysis
 
-- Task at hand: 
+- ### Task at hand: 
 
 ![Result](result.png)
 
-- Training Loss:
+- ### Training Loss:
 
 ![Loss-Graph](training-loss.png)
 
-- F1 Score:
+- ### F1 Score:
 
 ![F1-Score](dice-coefficient.png)
 
